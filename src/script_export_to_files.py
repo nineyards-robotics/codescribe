@@ -31,19 +31,29 @@ try:
         shutil.rmtree(src_folder)
     os.mkdir(src_folder)
 
-    for device_obj in get_device_entrypoints(scriptengine.projects.primary):
-        device_folder = os.path.join(src_folder, device_obj.get_name())
-        os.mkdir(device_folder)
+    devices = list(get_device_entrypoints(scriptengine.projects.primary))
 
-        application = find_application(device_obj)
-        application_folder = os.path.join(device_folder, "application")
-        os.mkdir(application_folder)
+    if len(devices) > 0:
+        # Standard project with Device node
+        for device_obj in devices:
+            device_folder = os.path.join(src_folder, device_obj.get_name())
+            os.mkdir(device_folder)
 
-        for child_obj in application.get_children():
-            export_child(child_obj, application, application_folder)
+            application = find_application(device_obj)
+            application_folder = os.path.join(device_folder, "application")
+            os.mkdir(application_folder)
 
-        communication = find_communication(device_obj)
-        export_communication(communication, device_folder)
+            for child_obj in application.get_children():
+                export_child(child_obj, application, application_folder)
+
+            communication = find_communication(device_obj)
+            export_communication(communication, device_folder)
+    else:
+        # Library project - export directly from project root
+        print("No device found, assuming library project - exporting from root...")
+        for child_obj in scriptengine.projects.primary.get_children():
+            export_child(child_obj, scriptengine.projects.primary, src_folder)
+
 except Exception as e:
     print(e)
     raise e

@@ -46,11 +46,19 @@ try:
 
     template_project = scriptengine.projects.get_by_path(new_template_path)
 
-    for device_obj in get_device_entrypoints(template_project):
-        application = find_application(device_obj)
-        remove_tracked_objects(application.get_children())
-        communication = find_communication(device_obj)
-        remove_tracked_communication_devices(communication)
+    devices = list(get_device_entrypoints(template_project))
+
+    if len(devices) > 0:
+        # Standard project with Device node
+        for device_obj in devices:
+            application = find_application(device_obj)
+            remove_tracked_objects(application.get_children())
+            communication = find_communication(device_obj)
+            remove_tracked_communication_devices(communication)
+    else:
+        # Library project - remove tracked objects directly from root
+        print("No device found, assuming library project - cleaning from root...")
+        remove_tracked_objects(template_project.get_children())
 
     template_project.save()
 

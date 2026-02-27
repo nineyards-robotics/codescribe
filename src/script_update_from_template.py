@@ -24,6 +24,10 @@ try:
     assert_project_open()
 
     template_paths, template_versions = find_template_paths_and_versions(scriptengine.projects.primary)
+
+    if len(template_paths) < 1:
+        raise ValueError("No template file found! Run 'Save As Template' first.")
+
     newest_template_path = get_newest_template_path(template_paths, template_versions)
 
     ui_continue = scriptengine.system.ui.prompt(

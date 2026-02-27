@@ -1,3 +1,4 @@
+import io
 import os
 
 from communication_import_export import import_communication
@@ -45,7 +46,7 @@ def import_directory_child(child, dir_path, dir_parent_obj):
             import_native(child, dir_path, dir_parent_obj, import_directory)
         if ext == ".st":
             # Have to check for keywords to determine if POU or DUT
-            with open(full_path, "r") as f:
+            with io.open(full_path, "r", encoding="utf-8") as f:
                 for word in first_word_of_line_iter(f):
                     if word == "TYPE":
                         import_dut(child, dir_path, dir_parent_obj, import_directory)
@@ -59,14 +60,23 @@ def import_from_files(project):
     print("Reading from: " + src_folder)
     assert_path_exists(src_folder)
 
-    for device_obj in get_device_entrypoints(project):
-        device_folder = os.path.join(src_folder, device_obj.get_name())
-        assert_path_exists(device_folder)
+    devices = list(get_device_entrypoints(project))
 
-        application = find_application(device_obj)
-        application_folder = os.path.join(device_folder, "application")
-        remove_tracked_objects(application.get_children())
-        import_directory(application_folder, application)
+    if len(devices) > 0:
+        # Standard project with Device node
+        for device_obj in devices:
+            device_folder = os.path.join(src_folder, device_obj.get_name())
+            assert_path_exists(device_folder)
 
-        communication = find_communication(device_obj)
-        import_communication(communication, device_folder)
+            application = find_application(device_obj)
+            application_folder = os.path.join(device_folder, "application")
+            remove_tracked_objects(application.get_children())
+            import_directory(application_folder, application)
+
+            communication = find_communication(device_obj)
+            import_communication(communication, device_folder)
+    else:
+        # Library project - import directly from src root
+        print("No device found, assuming library project - importing from root...")
+        remove_tracked_objects(project.get_children())
+        import_directory(src_folder, project)
