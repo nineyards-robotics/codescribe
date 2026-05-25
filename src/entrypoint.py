@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # REMEMBER: this is python 2.7
 from object_type import ObjectType, get_object_type
 from util import *

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 from import_export import write_native

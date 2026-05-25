@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # REMEMBER: this is python 2.7
 import os
 import re
@@ -32,18 +33,15 @@ _ESCAPED_TIMESTAMP_PATTERNS = [
 ]
 
 def normalize_timestamps_in_xml(path):
-    with open(path, "rb") as f:
+    # Читаем с сохранением кодировки
+    import codecs
+    with codecs.open(path, 'r', encoding='utf-8') as f:
         content = f.read()
-    
-    # Handle Python 2 vs 3 compatibility
-    if isinstance(content, bytes):
-        content = content.decode('utf-8')
     
     normalizedContent = content
     numOfReplacements = 0
     
-    # Pattern for Timestamp - using re.DOTALL to match across newlines
-    # Pattern matches: <Single ... Name="Timestamp" ...>NUMBER</Single>
+    # Паттерны остаются те же
     timestamp_pattern = re.compile(
         r'(<Single\s+[^>]*?Name="Timestamp"[^>]*?>)(\d+)(</Single>)',
         re.DOTALL | re.IGNORECASE
@@ -51,7 +49,6 @@ def normalize_timestamps_in_xml(path):
     normalizedContent, count1 = timestamp_pattern.subn(r'\g<1>0\g<3>', normalizedContent)
     numOfReplacements += count1
     
-    # Pattern for LastModification
     lastmod_pattern = re.compile(
         r'(<Single\s+[^>]*?Name="LastModification"[^>]*?>)(\d+)(</Single>)',
         re.DOTALL | re.IGNORECASE
@@ -59,25 +56,17 @@ def normalize_timestamps_in_xml(path):
     normalizedContent, count2 = lastmod_pattern.subn(r'\g<1>0\g<3>', normalizedContent)
     numOfReplacements += count2
     
-    # print("Normalized timestamps: " + str(numOfReplacements) + " in " + path)
-    
     if numOfReplacements == 0:
         print("WARNING: No timestamps found in " + path)
         return
     
-    # Write back as bytes
-    if isinstance(normalizedContent, str):
-        normalizedContent = normalizedContent.encode('utf-8')
-    
-    tempPath = path + ".tmp"
-    
-    with open(tempPath, "wb") as f:
+    # Записываем с явной UTF-8 кодировкой
+    with codecs.open(path + ".tmp", 'w', encoding='utf-8') as f:
         f.write(normalizedContent)
     
     if os.path.exists(path):
         os.remove(path)
-    
-    os.rename(tempPath, path)
+    os.rename(path + ".tmp", path)
 
 def write_st(obj, f):
 	f.write(obj.textual_declaration.text)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 from communication_import_export import import_communication
