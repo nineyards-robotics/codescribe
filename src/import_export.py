@@ -8,71 +8,108 @@ from util import *
 IMPLEMENTATION_DELIMITER_SPLIT = "// --- BEGIN IMPLEMENTATION ---"
 IMPLEMENTATION_DELIMITER_INSERT = "\n" + IMPLEMENTATION_DELIMITER_SPLIT + "\n\n"
 
+_TIMESTAMP_PATTERNS = [
+    # Pattern for Timestamp in regular XML
+    re.compile(
+        r'(<Single\b[^>]*\bName="Timestamp"\b[^>]*>)([^<]*)(</Single>)'
+    ),
+    # Pattern for LastModification in regular XML
+    re.compile(
+        r'(<Single\b[^>]*\bName="LastModification"\b[^>]*>)([^<]*)(</Single>)'
+    ),
+]
+
+# Additional patterns for escaped XML content (like inside StructuredView)
+_ESCAPED_TIMESTAMP_PATTERNS = [
+    # Pattern for escaped Timestamp
+    re.compile(
+        r'(\\u003CSingle\\u0020[^\\]*\\bName="Timestamp"\\b[^\\]*\\u003E)(\d+)(\\u003C/Single\\u003E)'
+    ),
+    # Pattern for escaped LastModification
+    re.compile(
+        r'(\\u003CSingle\\u0020[^\\]*\\bName="LastModification"\\b[^\\]*\\u003E)(\d+)(\\u003C/Single\\u003E)'
+    ),
+]
+
+def normalize_timestamps_in_xml(path):
+    with open(path, "rb") as f:
+        content = f.read()
+    
+    # Handle Python 2 vs 3 compatibility
+    if isinstance(content, bytes):
+        content = content.decode('utf-8')
+    
+    normalizedContent = content
+    numOfReplacements = 0
+    
+    # Pattern for Timestamp - using re.DOTALL to match across newlines
+    # Pattern matches: <Single ... Name="Timestamp" ...>NUMBER</Single>
+    timestamp_pattern = re.compile(
+        r'(<Single\s+[^>]*?Name="Timestamp"[^>]*?>)(\d+)(</Single>)',
+        re.DOTALL | re.IGNORECASE
+    )
+    normalizedContent, count1 = timestamp_pattern.subn(r'\g<1>0\g<3>', normalizedContent)
+    numOfReplacements += count1
+    
+    # Pattern for LastModification
+    lastmod_pattern = re.compile(
+        r'(<Single\s+[^>]*?Name="LastModification"[^>]*?>)(\d+)(</Single>)',
+        re.DOTALL | re.IGNORECASE
+    )
+    normalizedContent, count2 = lastmod_pattern.subn(r'\g<1>0\g<3>', normalizedContent)
+    numOfReplacements += count2
+    
+    # print("Normalized timestamps: " + str(numOfReplacements) + " in " + path)
+    
+    if numOfReplacements == 0:
+        print("WARNING: No timestamps found in " + path)
+        return
+    
+    # Write back as bytes
+    if isinstance(normalizedContent, str):
+        normalizedContent = normalizedContent.encode('utf-8')
+    
+    tempPath = path + ".tmp"
+    
+    with open(tempPath, "wb") as f:
+        f.write(normalizedContent)
+    
+    if os.path.exists(path):
+        os.remove(path)
+    
+    os.rename(tempPath, path)
 
 def write_st(obj, f):
-    f.write(obj.textual_declaration.text)
-    f.write(IMPLEMENTATION_DELIMITER_INSERT)
-    f.write(obj.textual_implementation.text)
-
+	f.write(obj.textual_declaration.text)
+	f.write(IMPLEMENTATION_DELIMITER_INSERT)
+	f.write(obj.textual_implementation.text)
 
 def write_st_decl_only(obj, f):
-    f.write(obj.textual_declaration.text)
+	f.write(obj.textual_declaration.text)
 
 
 def import_st(f, obj):
-    f.seek(0)
-    content = str(f.read())
-    declaration, implementation = content.split(IMPLEMENTATION_DELIMITER_SPLIT)
-    obj.textual_declaration.replace(declaration.strip() + "\n")
-    obj.textual_implementation.replace(implementation.strip() + "\n")
-
+	f.seek(0)
+	content = str(f.read())
+	declaration, implementation = content.split(IMPLEMENTATION_DELIMITER_SPLIT)
+	obj.textual_declaration.replace(declaration.strip() + "\n")
+	obj.textual_implementation.replace(implementation.strip() + "\n")
 
 def import_st_decl_only(f, obj):
-    f.seek(0)
-    content = str(f.read())
-    obj.textual_declaration.replace(content.strip() + "\n")
+	f.seek(0)
+	content = str(f.read())
+	obj.textual_declaration.replace(content.strip() + "\n")
 
+def write_native(obj, path, recursive = False):
+	obj.export_native(path, recursive = recursive)
 
-def write_native(obj, path, recursive=False):
-    obj.export_native(path, recursive=recursive)
-
-    # using regex instead of an xml parser because it is much quicker (sorry)
-    with open(path, "r+") as f:
-        lines = f.read()
-
-        # XXX: Warning! Overwriting Id's broke visualisations
-        # It's probably a bad idea to overwrite Id's and UUIDs, even if it is annoying to have them show up in the diff
-        # Stick to just overwriting timestamps for now
-
-        # uuid_replaced = re.sub(
-        #     r'(^.+<Single Name="(?:EventPOUGuid|ParentSVNodeGuid|ParentGuid|LmGuid|LmStructTypeGuid|LmArrayTypeGuid|IoConfigGlobalsGuid|IoConfigGLobalsMappingGuid|IoConfigVarConfigGuid|IoConfigErrorPouGuid)".+?>).+(<\/Single>$)',
-        #     r"\g<1>00000000-0000-0000-0000-000000000000\g<2>",
-        #     lines,
-        #     flags=re.MULTILINE,
-        # )
-
-        # match any tags with Timestamp or Id and replace their contents with "0"
-        # timestamp_replaced = re.sub(
-        #     r'(^.+<Single Name="(?:Timestamp|Id)" Type="long">).+(<\/Single>$)',
-        #     r"\g<1>0\g<2>",
-        #     lines,
-        #     flags=re.MULTILINE,
-        # )
-
-        timestamp_replaced = re.sub(
-            r'(^.+<Single Name="(?:Timestamp)" Type="long">).+(<\/Single>$)',
-            r"\g<1>0\g<2>",
-            lines,
-            flags=re.MULTILINE,
-        )
-
-        f.seek(0)
-        f.write(timestamp_replaced)
-        f.truncate()
-
+	try:
+		normalize_timestamps_in_xml(path)
+	except Exception as e:
+		print("WARNING: Failed to normalize timestamps in " + path + ": " + str(e))
 
 def read_native(f, obj):
-    obj.import_native(f)
+	obj.import_native(f)
 
 
 def export_folder(child_obj, parent_obj, parent_folder_path, export_child_fn):

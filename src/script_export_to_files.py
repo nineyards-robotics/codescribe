@@ -3,7 +3,11 @@ from __future__ import print_function
 
 import os
 import shutil
+import imp
+import sys
 
+imp.reload(sys)
+sys.setdefaultencoding('utf-8')
 import scriptengine  # type: ignore
 
 from communication_import_export import export_communication
