@@ -37,9 +37,13 @@ def import_communication(communication_obj, device_folder):
     if not os.path.exists(communication_folder):
         return
 
+    # Проверка что communication_obj существует
+    if communication_obj is None:
+        print("Warning: Communication object is None, skipping import")
+        return
+
     remove_tracked_communication_devices(communication_obj)
 
-    # for top level folders inside the communcation folder, do a native import on the corresponding communication device
     for name in os.listdir(communication_folder):
         full_path = os.path.join(communication_folder, name)
         if not os.path.isdir(full_path):

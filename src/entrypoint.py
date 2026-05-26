@@ -32,7 +32,22 @@ def find_application(device_obj):
 
 
 def find_communication(device_obj):
-    return first_or_error(
-        device_obj.find("Communication", recursive=True),
-        "Couldn't find Communication inside " + device_obj.get_name(),
-    )
+    # Ищем Communication как папку или объект
+    comm_obj = None
+    
+    # Пытаемся найти Communication
+    for obj in device_obj.find("Communication", recursive=True):
+        comm_obj = obj
+        break
+    
+    if comm_obj is None:
+        # Пробуем другие варианты имени
+        for obj in device_obj.find("Communications", recursive=True):
+            comm_obj = obj
+            break
+    
+    if comm_obj is None:
+        print("Warning: Communication object not found in " + device_obj.get_name())
+        return None
+    
+    return comm_obj

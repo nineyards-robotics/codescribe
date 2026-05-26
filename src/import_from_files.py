@@ -25,6 +25,8 @@ def import_directory_child(child, dir_path, dir_parent_obj):
     full_path = os.path.join(dir_path, child)
     filename, ext = os.path.splitext(child)
 
+    print("Importing: " + child)
+
     if os.path.isdir(full_path):
         import_folder(child, dir_path, dir_parent_obj, import_directory)
 
@@ -70,4 +72,7 @@ def import_from_files(project):
         import_directory(application_folder, application)
 
         communication = find_communication(device_obj)
-        import_communication(communication, device_folder)
+        if communication is not None:
+            import_communication(communication, device_folder)
+        else:
+            print("Skipping communication import for " + device_obj.get_name())

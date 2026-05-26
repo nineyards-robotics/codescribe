@@ -20,6 +20,31 @@ class ObjectType:
     FOLDER = "FOLDER"
     CALL_TO_POU = "CALL_TO_POU"
     VISUALISATION = "VISUALISATION"
+
+    # Новые типы, обнаруженные в проекте
+    PLC_LOGIC = "PLC_LOGIC"
+    TEXT_LIST = "TEXT_LIST"
+    INTERFACE_METHOD = "INTERFACE_METHOD"
+    PERSISTENT = "PERSISTENT"
+    IMAGE_POOL = "IMAGE_POOL"
+    ALARM_GROUP = "ALARM_GROUP"
+    ALARM_CLASS = "ALARM_CLASS"
+    ALARM_STORAGE = "ALARM_STORAGE"
+    GET_ACCESSOR = "GET_ACCESSOR"
+    ABSTRACT_CLASS_METHOD = "ABSTRACT_CLASS_METHOD"
+    INTERFACE_GET_ACCESSOR = "INTERFACE_GET_ACCESSOR"
+    EXTERNAL_FILE = "EXTERNAL_FILE"
+    ADDITIONAL_DEVICE = "ADDITIONAL_DEVICE"
+    APPLICATION = "APPLICATION"
+    INTERFACE = "INTERFACE"
+    TASK = "TASK"
+    VISUALIZATION_MANAGER = "VISUALIZATION_MANAGER"
+    WEB_VISUALIZATION = "WEB_VISUALIZATION"
+    ALARM_CONFIGURATION = "ALARM_CONFIGURATION"
+    RESOURCE = "RESOURCE"
+    VISUALIZATION_STYLE = "VISUALIZATION_STYLE"
+    GLOBAL_TEXT_LIST = "GLOBAL_TEXT_LIST"
+
     UNKNOWN = "UNKNOWN"
 
     @classmethod
@@ -36,6 +61,7 @@ class ObjectType:
 # https://github.com/18thCentury/CodeSys/blob/master/export.py#L10
 
 GUID_TYPE_MAPPING = {
+    # Существующие GUID
     "6f9dac99-8de1-4efc-8465-68ac443b7d08": ObjectType.POU,
     "2db5746d-d284-4425-9f7f-2663a34b0ebc": ObjectType.DUT,
     "ffbfa93a-b94d-45fc-a329-229860183b1d": ObjectType.GVL,
@@ -52,6 +78,30 @@ GUID_TYPE_MAPPING = {
     "738bea1e-99bb-4f04-90bb-a7a567e74e3a": ObjectType.FOLDER,
     "413e2a7d-adb1-4d2c-be29-6ae6e4fab820": ObjectType.CALL_TO_POU,
     "f18bec89-9fef-401d-9953-2f11739a6808": ObjectType.VISUALISATION,
+
+    # Новые GUID из проекта
+    "40b404f9-e5dc-42c6-907f-c89f4a517386": ObjectType.PLC_LOGIC,
+    "639b491f-5557-464c-af91-1471bac9f549": ObjectType.APPLICATION,
+    "6654496c-404d-479a-aad2-8551054e5f1e": ObjectType.INTERFACE,           # Моторы
+    "f89f7675-27f1-46b3-8abb-b7da8e774ffd": ObjectType.INTERFACE_METHOD,    # start
+    "2bef0454-1bd3-412a-ac2c-af0f31dbc40f": ObjectType.TEXT_LIST,           # Rejim_heat
+    "98a2708a-9b18-4f31-82ed-a1465b24fa2d": ObjectType.TASK,                # VISU_TASK
+    "261bd6e6-249c-4232-bb6f-84c2fbeef430": ObjectType.PERSISTENT,          # Pr (глобальные ссылки)
+    "bb0b9044-714e-4614-ad3e-33cbdf34d16b": ObjectType.IMAGE_POOL,          # Triline
+    "c0a56ce5-14a3-4757-ac56-3eab44c974b3": ObjectType.ALARM_CONFIGURATION,
+    "21f4ed1d-ec95-4666-820e-4abf64d93d6b": ObjectType.ALARM_GROUP,         # Alarm_con
+    "b8b46f61-c7c1-4259-87e4-26fe674798f9": ObjectType.ALARM_CLASS,         # Info
+    "5bd56248-46fc-4108-be33-ed01ad87d070": ObjectType.ALARM_STORAGE,       # AlarmStorage
+    "792f2eb6-721e-4e64-ba20-bc98351056db": ObjectType.GET_ACCESSOR,        # Get
+    "62ebfd1c-d342-43e5-8efb-f22b6d8e4a04": ObjectType.ABSTRACT_CLASS_METHOD,   # init
+    "28747452-a93d-4b34-8d05-d2c6018edd7d": ObjectType.INTERFACE_GET_ACCESSOR,  # Get (другой)
+    "a56744ff-693f-4597-95f9-0e1c529fffc2": ObjectType.EXTERNAL_FILE,       # favicon
+    # "8e687a04-7ca7-42d3-be06-fcbda676c5ef": ObjectType.VISUALIZATION_STYLE,
+    # "4d3fdb8f-ab50-4c35-9d3a-d4bb9bb9a628": ObjectType.VISUALIZATION_MANAGER,
+    # "0fdbf158-1ae0-47d9-9269-cd84be308e9d": ObjectType.WEB_VISUALIZATION,
+    "085766fd-043e-4545-8e8d-d651d56d5d3b": ObjectType.ADDITIONAL_DEVICE,   # PLC210_03
+    "63784cbb-9ba0-45e6-9d69-babf3f040511": ObjectType.GLOBAL_TEXT_LIST,
+    "9001d745-b9c5-4d77-90b7-b29c3f77a23b": ObjectType.RESOURCE,      # изображение sun_650x450.jpg
 }
 
 
