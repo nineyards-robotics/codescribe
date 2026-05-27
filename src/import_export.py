@@ -9,29 +9,6 @@ from util import *
 IMPLEMENTATION_DELIMITER_SPLIT = "// --- BEGIN IMPLEMENTATION ---"
 IMPLEMENTATION_DELIMITER_INSERT = "\n" + IMPLEMENTATION_DELIMITER_SPLIT + "\n\n"
 
-_TIMESTAMP_PATTERNS = [
-    # Pattern for Timestamp in regular XML
-    re.compile(
-        r'(<Single\b[^>]*\bName="Timestamp"\b[^>]*>)([^<]*)(</Single>)'
-    ),
-    # Pattern for LastModification in regular XML
-    re.compile(
-        r'(<Single\b[^>]*\bName="LastModification"\b[^>]*>)([^<]*)(</Single>)'
-    ),
-]
-
-# Additional patterns for escaped XML content (like inside StructuredView)
-_ESCAPED_TIMESTAMP_PATTERNS = [
-    # Pattern for escaped Timestamp
-    re.compile(
-        r'(\\u003CSingle\\u0020[^\\]*\\bName="Timestamp"\\b[^\\]*\\u003E)(\d+)(\\u003C/Single\\u003E)'
-    ),
-    # Pattern for escaped LastModification
-    re.compile(
-        r'(\\u003CSingle\\u0020[^\\]*\\bName="LastModification"\\b[^\\]*\\u003E)(\d+)(\\u003C/Single\\u003E)'
-    ),
-]
-
 def log_import_object(obj, context=""):  # DEBUG
     """Выводит в консоль информацию об импортированном объекте."""
     obj_type = get_object_type(obj)
