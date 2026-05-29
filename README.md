@@ -138,3 +138,11 @@ Once installed, proceed to [Adding the Script Toolbar to CODESYS](#adding-the-sc
 ## Similar Projects
 
 - https://github.com/18thCentury/CodeSys
+
+## License & Attribution
+
+Licensed under the Apache License, Version 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+This project is a modified fork of [CODESCRIBE](https://github.com/nineyards-robotics/codescribe)
+by the CODESCRIBE authors (including Greenforge Labs). See [NOTICE](NOTICE) for details of the
+original work and the changes made in this fork.
