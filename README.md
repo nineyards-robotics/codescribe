@@ -57,6 +57,16 @@ Exporting communication devices has been hardcoded to create folders for top-lev
 
 **If this functionality is causing you problems, it can be disabled by adding a folder with the name `_NO_EXPORT` directly under `Communication`.** You can then still rely on your project template to carry your communication configurations.
 
+## Selective Export and Import
+
+In addition to the full project export/import, CODESCRIBE provides two scripts for working with only a subset of objects:
+
+- **Export Selected** (`script_export_selected.py`): Opens a GUI tree view of the project (starting from the `Application` object). You can tick individual objects (folders, POUs, GVLS, etc.) or the entire `Application`. When you confirm, only the selected objects are exported to the plaintext file structure, preserving their relative paths inside the `application/` folder. If `Application` itself is selected, all children are exported (same as full export).
+
+- **Import Selected** (`script_import_selected.py`): Similarly, opens a GUI tree view where you can choose which objects to import. The script then removes the existing versions of those objects from the CODESYS project and re‑imports them from the corresponding plaintext files. If `Application` is selected, the script performs a full import (identical to `Import From Files`). This is useful for quickly refreshing a few modified objects without touching the rest of the project.
+
+Both scripts respect the same file structure created by `Export To Files`. The selective export does **not** delete files for unselected objects; it only writes or overwrites the selected ones. The selective import only affects the chosen objects, leaving all others unchanged.
+
 ## Status
 
 CODESCRIBE has been tested only on CODESYS V3.5 SP11, using the project structure supplied by the IFM CR711s packages.
@@ -80,7 +90,6 @@ Open the copy of `config.json` and edit the `"Icon"` and `"Path"` fields to poin
 ```json
 "Icon": "export_to_files.ico",
 "Path": "script_export_to_files.py",
-```
 
 Should be changed to:
 

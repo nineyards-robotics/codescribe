@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+
+    # -*- coding: utf-8 -*-
 # REMEMBER: this is python 2.7
 
 import clr
@@ -13,15 +14,12 @@ from System.Drawing import Size, Point
 
 from object_type import get_object_type, ObjectType
 
-
+# if you need to hide some types, add them here
 EXCLUDED_TYPES = set([
-    # если нужно скрывать какие-то типы, добавьте сюда
 ])
-
 
 def is_selectable(obj_type):
     return obj_type not in EXCLUDED_TYPES
-
 
 def build_tree_nodes(parent_node, parent_obj):
     parent_type = get_object_type(parent_obj)
@@ -41,7 +39,6 @@ def build_tree_nodes(parent_node, parent_obj):
             node.Tag = child
             parent_node.Nodes.Add(node)
 
-
 class ExportSelectorForm(Form):
     def __init__(self, root_objects):
         Form.__init__(self)
@@ -49,7 +46,7 @@ class ExportSelectorForm(Form):
         self.SelectedObjects = []
         self._syncing_checks = False
 
-        self.Text = u"Выбор объектов для экспорта"
+        self.Text = "Select Objects for Export"
         self.Size = Size(600, 700)
         self.StartPosition = FormStartPosition.CenterScreen
         self.FormBorderStyle = FormBorderStyle.Sizable
@@ -66,7 +63,7 @@ class ExportSelectorForm(Form):
         self.btn_ok.Click += self.on_ok
 
         self.btn_cancel = Button()
-        self.btn_cancel.Text = u"Отмена"
+        self.btn_cancel.Text = "Cancel"
         self.btn_cancel.Size = Size(90, 28)
         self.btn_cancel.Location = Point(490, 10)
         self.btn_cancel.Click += self.on_cancel
@@ -123,10 +120,11 @@ class ExportSelectorForm(Form):
         self.DialogResult = DialogResult.Cancel
         self.Close()
 
-
 def select_objects(root_objects):
     form = ExportSelectorForm(root_objects)
     result = form.ShowDialog()
     if result == DialogResult.OK:
         return form.SelectedObjects
     return []
+
+  

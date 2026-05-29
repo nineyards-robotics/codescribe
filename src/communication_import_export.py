@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+
+    # -*- coding: utf-8 -*-
 import os
 
 from import_export import write_native
@@ -7,15 +8,14 @@ from util import *
 
 NO_EXPORT_FOLDER_NAME = "_NO_EXPORT"
 
-
 def no_export_folder_exists(communication_obj):
+    """Check if a folder named _NO_EXPORT exists inside the communication object."""
     return first_of_type_or_none(communication_obj.find(NO_EXPORT_FOLDER_NAME), ObjectType.FOLDER) is not None
-
 
 def export_communication(communication_obj, device_folder):
     """
-    Export communication is hardcoded to create folders for the top level devices inside the communication object, and
-    then do a native recursive export for any devices under those top level devices.
+    Export communication is hardcoded to create folders for the top level devices inside the communication object,
+    and then do a native recursive export for any devices under those top level devices.
     """
     if no_export_folder_exists(communication_obj):
         return
@@ -31,13 +31,12 @@ def export_communication(communication_obj, device_folder):
                 child_device, os.path.join(top_level_device_folder, child_device.get_name() + ".xml"), recursive=True
             )
 
-
 def import_communication(communication_obj, device_folder):
     communication_folder = os.path.join(device_folder, "communication")
     if not os.path.exists(communication_folder):
         return
 
-    # Проверка что communication_obj существует
+    # Check that communication_obj exists
     if communication_obj is None:
         print("Warning: Communication object is None, skipping import")
         return
@@ -57,12 +56,13 @@ def import_communication(communication_obj, device_folder):
             if ext == ".xml":
                 top_level_device.import_native(os.path.join(full_path, child_name))
 
-
 def remove_tracked_communication_devices(communication_obj):
     if no_export_folder_exists(communication_obj):
         return
 
-    # remove all children from top level devices
+    # Remove all children from top level devices
     for top_level_device in communication_obj.get_children():
         for child in top_level_device.get_children():
             child.remove()
+
+  

@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+
+    # -*- coding: utf-8 -*-
 from __future__ import print_function
 
 import imp
@@ -12,14 +13,13 @@ import scriptengine
 
 from entrypoint import get_device_entrypoints, find_application, get_src_folder
 from gui_export_selector import select_objects
-from import_from_files import import_directory_child, import_from_files  # добавлен import_from_files
+from import_from_files import import_directory_child, import_from_files  # Added import_from_files
 from util import print_python_version, assert_project_open
-
 
 def find_path_to_object(root_obj, target_obj, current_path=None):
     """
-    Возвращает список имён от root_obj (исключая root) до target_obj.
-    Если target_obj == root_obj, возвращает [].
+    Returns a list of names from root_obj (excluding root) to target_obj.
+    If target_obj == root_obj, returns [].
     """
     if current_path is None:
         current_path = []
@@ -33,9 +33,8 @@ def find_path_to_object(root_obj, target_obj, current_path=None):
             return sub_path
     return None
 
-
 def get_object_by_path(root_obj, path_parts):
-    """Возвращает объект по списку имён потомков, начиная от root_obj."""
+    """Returns the object by a list of child names starting from root_obj."""
     current = root_obj
     for name in path_parts:
         found = None
@@ -47,7 +46,6 @@ def get_object_by_path(root_obj, path_parts):
             return None
         current = found
     return current
-
 
 def main():
     print_python_version()
@@ -69,7 +67,7 @@ def main():
         print("No Application found in device!")
         return
 
-    # Подтверждение
+    # Confirmation
     ui_continue = scriptengine.system.ui.prompt(
         "Import Selected Objects will overwrite chosen objects from files.\n\n"
         "Do you want to continue?",
@@ -82,21 +80,21 @@ def main():
         print("Import cancelled by user.")
         return
 
-    # Выбор объектов через GUI
+    # Select objects via GUI
     selected = select_objects([application])
     if not selected:
         print("No objects selected. Import cancelled.")
         return
 
-    # Если выбран Application — запускаем полный импорт и выходим
+    # If Application is selected — run full import and exit
     if application in selected:
         print("Application selected. Performing full import using import_from_files...")
         import_from_files(scriptengine.projects.primary)
         print("Full import completed.")
         return
 
-    # Иначе — импорт выбранных объектов по отдельности
-    # Строим пути для выбранных объектов
+    # Otherwise — import selected objects individually
+    # Build paths for selected objects
     objects_with_path = []
     for obj in selected:
         path_parts = find_path_to_object(application, obj)
@@ -105,27 +103,27 @@ def main():
             continue
         objects_with_path.append((obj, path_parts))
 
-    # Сортируем по глубине (сначала родители)
+    # Sort by depth (parents first)
     objects_with_path.sort(key=lambda x: len(x[1]))
 
-    # Импортируем
+    # Import
     for obj, path_parts in objects_with_path:
         obj_name = obj.get_name()
         print("Processing: " + obj_name)
 
-        # Родительский путь (без последнего элемента)
+        # Parent path (without last element)
         parent_path_parts = path_parts[:-1]
         parent_obj = get_object_by_path(application, parent_path_parts)
         if parent_obj is None:
             print("  ERROR: parent object not found, skipping")
             continue
 
-        # Путь к родительской папке в файловой системе
+        # Path to parent folder in file system
         parent_folder_path = os.path.join(device_folder, "application", *parent_path_parts)
         if not os.path.exists(parent_folder_path):
             print("  WARNING: folder does not exist: " + parent_folder_path)
 
-        # Удаляем старый объект
+        # Delete old object
         try:
             obj.remove()
             print("  Removed existing object")
@@ -133,7 +131,7 @@ def main():
             print("  Failed to remove object: " + str(e))
             continue
 
-        # Импортируем заново
+        # Import again
         try:
             import_directory_child(obj_name, parent_folder_path, parent_obj)
             print("  Imported successfully")
@@ -142,10 +140,11 @@ def main():
 
     print("Done!")
 
-
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
         print(e)
         raise e
+
+  

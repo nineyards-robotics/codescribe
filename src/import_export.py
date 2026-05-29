@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+
+    # -*- coding: utf-8 -*-
 # REMEMBER: this is python 2.7
 import os
 import re
@@ -9,8 +10,8 @@ from util import *
 IMPLEMENTATION_DELIMITER_SPLIT = "// --- BEGIN IMPLEMENTATION ---"
 IMPLEMENTATION_DELIMITER_INSERT = "\n" + IMPLEMENTATION_DELIMITER_SPLIT + "\n\n"
 
-def log_import_object(obj, context=""):  # DEBUG
-    """Выводит в консоль информацию об импортированном объекте."""
+def log_import_object(obj, context=""):
+    """Prints information about the imported object to the console."""
     obj_type = get_object_type(obj)
     obj_guid = str(obj.type) if hasattr(obj, 'type') else "NO_GUID"
     print("[IMPORT] %s | Type: %s | GUID: %s | Name: %s" % (
@@ -21,38 +22,38 @@ def normalize_timestamps_in_xml(path):
     if not os.path.exists(path):
         print("WARNING: normalize_timestamps_in_xml called for non-existent file: %s" % path)
         return
-    
-    # Читаем с сохранением кодировки
+
+    # Read while preserving encoding
     import codecs
     with codecs.open(path, 'r', encoding='utf-8') as f:
         content = f.read()
-    
+
     normalizedContent = content
     numOfReplacements = 0
-    
-    # Паттерны остаются те же
+
+    # Patterns remain the same
     timestamp_pattern = re.compile(
         r'(<Single\s+[^>]*?Name="Timestamp"[^>]*?>)(\d+)(</Single>)',
         re.DOTALL | re.IGNORECASE
     )
     normalizedContent, count1 = timestamp_pattern.subn(r'\g<1>0\g<3>', normalizedContent)
     numOfReplacements += count1
-    
+
     lastmod_pattern = re.compile(
         r'(<Single\s+[^>]*?Name="LastModification"[^>]*?>)(\d+)(</Single>)',
         re.DOTALL | re.IGNORECASE
     )
     normalizedContent, count2 = lastmod_pattern.subn(r'\g<1>0\g<3>', normalizedContent)
     numOfReplacements += count2
-    
+
     if numOfReplacements == 0:
         print("WARNING: No timestamps found in " + path)
         return
-    
-    # Записываем с явной UTF-8 кодировкой
+
+    # Write with explicit UTF-8 encoding
     with codecs.open(path + ".tmp", 'w', encoding='utf-8') as f:
         f.write(normalizedContent)
-    
+
     if os.path.exists(path):
         os.remove(path)
     os.rename(path + ".tmp", path)
@@ -65,47 +66,46 @@ def write_st(obj, f):
 def write_st_decl_only(obj, f):
     f.write(obj.textual_declaration.text)
 
-
 def import_st(f, obj):
     f.seek(0)
     content = str(f.read())
     declaration, implementation = content.split(IMPLEMENTATION_DELIMITER_SPLIT)
     obj.textual_declaration.replace(declaration.strip() + "\n")
     obj.textual_implementation.replace(implementation.strip() + "\n")
-    log_import_object(obj, "import_st")  # DEBUG
+    log_import_object(obj, "import_st")
 
 def import_st_decl_only(f, obj):
     f.seek(0)
     content = str(f.read())
     obj.textual_declaration.replace(content.strip() + "\n")
-    log_import_object(obj, "import_st_decl_only")  # DEBUG
+    log_import_object(obj, "import_st_decl_only")
 
 def write_native(obj, path, recursive=False):
-    # Отладочная информация до экспорта
+    # Debug info before export
     obj_type = get_object_type(obj)
     obj_name = obj.get_name()
     print("[DEBUG] write_native: object='%s' type='%s' path='%s' recursive=%s" % (
         obj_name, obj_type, path, recursive))
 
-    # Вызываем экспорт (файл должен создаться)
+    # Call export (file should be created)
     obj.export_native(path, recursive=recursive)
 
-    # Проверяем, создался ли файл
+    # Check if file was created
     if not os.path.exists(path):
         print("[WARNING] export_native did NOT create file: %s (object=%s, type=%s)" % (
             path, obj_name, obj_type))
-        # Не пытаемся получить родителя – его может не быть или нет метода get_parent
-        # Вместо этого выведем несколько свойств объекта для диагностики
+        # Don't try to get parent – it may not exist or have get_parent method
+        # Instead, print some object properties for diagnostics
         print("[DEBUG] Object details: name='%s', type='%s', has_textual_implementation=%s" % (
             obj_name, obj_type, getattr(obj, 'has_textual_implementation', 'N/A')))
-        # Попробуем проверить, есть ли у объекта метод export_native
+        # Try to check if object has export_native method
         if hasattr(obj, 'export_native'):
             print("[DEBUG] Object has export_native method")
         else:
             print("[DEBUG] Object does NOT have export_native method")
-        return  # Не пытаемся нормализовать несуществующий файл
+        return  # Do not try to normalize a non-existent file
 
-    # Файл существует – нормализуем таймстампы
+    # File exists – normalize timestamps
     try:
         normalize_timestamps_in_xml(path)
         print("[DEBUG] normalize_timestamps_in_xml: OK for %s" % path)
@@ -115,13 +115,11 @@ def write_native(obj, path, recursive=False):
 def read_native(f, obj):
     obj.import_native(f)
 
-
 def export_folder(child_obj, parent_obj, parent_folder_path, export_child_fn):
     child_obj_folder = os.path.join(parent_folder_path, child_obj.get_name())
     os.mkdir(child_obj_folder)
     for c in child_obj.get_children():
         export_child_fn(c, child_obj, child_obj_folder)
-
 
 def import_folder(child, dir_path, dir_parent_obj, import_dir_fn):
     dir_parent_obj.create_folder(child)
@@ -130,9 +128,8 @@ def import_folder(child, dir_path, dir_parent_obj, import_dir_fn):
         ObjectType.FOLDER,
         "Folder of name " + child + " should have been created, but cannot be found",
     )
-    log_import_object(folder_obj, "import_folder")  # DEBUG
+    log_import_object(folder_obj, "import_folder")
     import_dir_fn(os.path.join(dir_path, child), folder_obj)
-
 
 def export_pou(child_obj, parent_obj, parent_folder_path, export_child_fn):
     if child_obj.has_textual_implementation:
@@ -141,22 +138,20 @@ def export_pou(child_obj, parent_obj, parent_folder_path, export_child_fn):
     else:
         export_native(child_obj, parent_obj, parent_folder_path, export_child_fn)
 
-    # Экспортируем дочерние элементы (включая папки интерфейсов)
+    # Export children (including interface folders)
     for c in child_obj.get_children():
         if get_object_type(c) == ObjectType.FOLDER:
-            # Папку внутри POU экспортируем как папку
+            # Export folder inside POU as a folder
             export_folder(c, child_obj, parent_folder_path, export_child_fn)
         else:
             export_child_fn(c, child_obj, parent_folder_path)
 
-
 def import_pou_st(child, dir_path, dir_parent_obj, import_dir_fn):
     filename, _ = os.path.splitext(child)
     pou_obj = dir_parent_obj.create_pou(filename)
-    log_import_object(pou_obj, "import_pou_st")  # DEBUG
+    log_import_object(pou_obj, "import_pou_st")
     with open(os.path.join(dir_path, child), "r") as f:
         import_st(f, pou_obj)
-
 
 def export_gvl(child_obj, parent_obj, parent_folder_path, export_child_fn):
     """
@@ -166,7 +161,6 @@ def export_gvl(child_obj, parent_obj, parent_folder_path, export_child_fn):
     write_native(child_obj, os.path.join(parent_folder_path, child_obj.get_name() + ".gvl.xml"), recursive=False)
     with open(os.path.join(parent_folder_path, child_obj.get_name() + ".gvl.st"), "w") as f:
         write_st_decl_only(child_obj, f)
-
 
 def import_gvl(child, dir_path, dir_parent_obj, import_dir_fn):
     """
@@ -188,22 +182,19 @@ def import_gvl(child, dir_path, dir_parent_obj, import_dir_fn):
         imported_obj = first_of_type_or_error(
             dir_parent_obj.find(name), ObjectType.GVL, name + " GVL should have been created, but cannot be found"
         )
-        log_import_object(imported_obj, "import_gvl (from xml)")  # DEBUG
+        log_import_object(imported_obj, "import_gvl (from xml)")
     else:
         imported_obj = dir_parent_obj.create_gvl(name)
-        log_import_object(imported_obj, "import_gvl (new)")  # DEBUG
+        log_import_object(imported_obj, "import_gvl (new)")
 
     with open(os.path.join(dir_path, child), "r") as f:
         import_st_decl_only(f, imported_obj)
 
-
 def export_native(child_obj, parent_obj, parent_folder_path, export_child_fn):
     write_native(child_obj, os.path.join(parent_folder_path, child_obj.get_name() + ".xml"), recursive=False)
 
-
 def export_native_recursive(child_obj, parent_obj, parent_folder_path, export_child_fn):
     write_native(child_obj, os.path.join(parent_folder_path, child_obj.get_name() + ".xml"), recursive=True)
-
 
 def import_native(child, dir_path, dir_parent_obj, import_dir_fn):
     full_path = os.path.join(dir_path, child)
@@ -222,24 +213,21 @@ def import_native(child, dir_path, dir_parent_obj, import_dir_fn):
             log_import_object(existing, "import_native (%s) already existed" % child)
         else:
             print("WARNING: No new object created for %s" % child)
-            # Дополнительно: вывести всех детей с их типами
+            # Additionally: print all children with their types
             for obj in dir_parent_obj.get_children():
                 print("  - %s : %s" % (obj.get_name(), get_object_type(obj)))
-
 
 def export_dut(child_obj, parent_obj, parent_folder_path, export_child_fn):
     with open(os.path.join(parent_folder_path, child_obj.get_name() + ".st"), "w") as f:
         f.write(child_obj.textual_declaration.text)
 
-
 def import_dut(child, dir_path, dir_parent_obj, import_dir_fn):
     filename, _ = os.path.splitext(child)
     dut_obj = dir_parent_obj.create_dut(filename)
-    log_import_object(dut_obj, "import_dut")  # DEBUG
+    log_import_object(dut_obj, "import_dut")
     with open(os.path.join(dir_path, child), "r") as f:
         f.seek(0)
         dut_obj.textual_declaration.replace(str(f.read()))
-
 
 def export_method(child_obj, parent_obj, parent_folder_path, export_child_fn):
     if child_obj.has_textual_implementation:
@@ -254,24 +242,22 @@ def export_method(child_obj, parent_obj, parent_folder_path, export_child_fn):
             recursive=False,
         )
 
-
 def import_method_st(child, dir_path, dir_parent_obj, import_dir_fn):
     full_path = os.path.join(dir_path, child)
     filename, _ = os.path.splitext(child)
     parent_name, method_name = filename.split(".")
-    
+
     parent_obj = first_of_type_or_none(dir_parent_obj.find(parent_name), ObjectType.POU)
     if parent_obj is None:
         parent_obj = first_of_type_or_none(dir_parent_obj.find(parent_name), ObjectType.INTERFACE)
-    
+
     if parent_obj is None:
         raise ValueError(parent_name + " should have been created, but cannot be found")
-    
+
     method_obj = parent_obj.create_method(method_name)
     log_import_object(method_obj, "import_method_st")
     with open(full_path, "r") as f:
         import_st(f, method_obj)
-
 
 def export_sub_pou(child_obj, parent_obj, parent_folder_path, export_child_fn):
     write_native(
@@ -280,26 +266,25 @@ def export_sub_pou(child_obj, parent_obj, parent_folder_path, export_child_fn):
         recursive=True,
     )
 
-
 def import_sub_pou(child, dir_path, dir_parent_obj, import_dir_fn):
     full_path = os.path.join(dir_path, child)
     filename, _ = os.path.splitext(child)
     parent_name = filename.split(".")[0]
     print("DEBUG: import_sub_pou for %s, looking for parent '%s' in %s" % (child, parent_name, dir_parent_obj.get_name()))
-    # Вывести всех детей dir_parent_obj с типами
+    # Print all children of dir_parent_obj with types
     for obj in dir_parent_obj.get_children():
         print("  child: %s (%s)" % (obj.get_name(), get_object_type(obj)))
-    
+
     parent_obj = None
-    # Ищем родителя среди POU, FOLDER, INTERFACE
+    # Look for parent among POU, FOLDER, INTERFACE
     parent_obj = first_of_type_or_none(dir_parent_obj.find(parent_name), ObjectType.POU)
     if parent_obj is None:
         parent_obj = first_of_type_or_none(dir_parent_obj.find(parent_name), ObjectType.FOLDER)
     if parent_obj is None:
         parent_obj = first_of_type_or_none(dir_parent_obj.find(parent_name), ObjectType.INTERFACE)
-    
+
     if parent_obj is None:
-        # Попробуем найти рекурсивно, возможно интерфейс лежит глубже
+        # Try to find recursively, maybe interface is deeper
         all_children = []
         def collect(obj):
             for c in obj.get_children():
@@ -310,30 +295,29 @@ def import_sub_pou(child, dir_path, dir_parent_obj, import_dir_fn):
             if c.get_name() == parent_name and get_object_type(c) == ObjectType.INTERFACE:
                 parent_obj = c
                 break
-    
+
     if parent_obj is None:
-        # Старый поиск внутри POU для интерфейсов-папок
+        # Old search inside POU for interface folders
         for obj in dir_parent_obj.get_children():
             if get_object_type(obj) == ObjectType.POU:
                 interface_folder = first_of_type_or_none(obj.find(parent_name), ObjectType.FOLDER)
                 if interface_folder is not None:
                     parent_obj = interface_folder
                     break
-    
+
     if parent_obj is None:
         raise ValueError(parent_name + " should have been created, but cannot be found")
-    
+
     child_name = filename.split(".")[-1]
     read_native(full_path, parent_obj)
-    # Логирование созданного объекта
+    # Logging created object
     for obj in parent_obj.get_children():
         if obj.get_name() == child_name:
             log_import_object(obj, "import_sub_pou (%s)" % child)
             break
 
-
 OBJECT_TYPE_TO_EXPORT_FUNCTION = {
-    # Существующие типы
+    # Existing types
     ObjectType.FOLDER: export_folder,
     ObjectType.POU: export_pou,
     ObjectType.GVL: export_gvl,
@@ -346,7 +330,7 @@ OBJECT_TYPE_TO_EXPORT_FUNCTION = {
     ObjectType.ACTION: export_sub_pou,
     ObjectType.TRANSITION: export_sub_pou,
 
-    # Новые типы из обновлённого маппинга
+    # New types from updated mapping
     ObjectType.PLC_LOGIC: export_native_recursive,
     ObjectType.APPLICATION: export_native_recursive,
     ObjectType.TASK: export_native_recursive,
@@ -372,9 +356,10 @@ OBJECT_TYPE_TO_EXPORT_FUNCTION = {
     ObjectType.CALL_TO_POU: export_native,
 }
 
-
 def remove_tracked_objects(obj_list):
     for obj in obj_list:
         if get_object_type(obj) in OBJECT_TYPE_TO_EXPORT_FUNCTION:
             print("Removing " + obj.get_name())
             obj.remove()
+
+  

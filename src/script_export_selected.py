@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+
+    # -*- coding: utf-8 -*-
 from __future__ import print_function
 
 import os
@@ -16,7 +17,6 @@ from util import print_python_version, assert_project_open
 from object_type import get_object_type
 from gui_export_selector import select_objects
 
-
 def remove_export_artifacts(folder, name):
     path_dir = os.path.join(folder, name)
     if os.path.exists(path_dir):
@@ -31,7 +31,6 @@ def remove_export_artifacts(folder, name):
         if os.path.exists(file_path):
             os.remove(file_path)
 
-
 def export_child(child_obj, parent_obj, parent_folder_path):
     child_obj_type = get_object_type(child_obj)
     export_fn = OBJECT_TYPE_TO_EXPORT_FUNCTION.get(child_obj_type)
@@ -44,9 +43,9 @@ def export_child(child_obj, parent_obj, parent_folder_path):
 
 def find_object_path_parts(root_obj, target_obj):
     """
-    Возвращает путь от root_obj до target_obj в виде списка имён.
-    root_obj в результат не включается.
-    Пример: ["new_beacon", "NewBeacon"]
+    Returns the path from root_obj to target_obj as a list of names.
+    root_obj is not included in the result.
+    Example: ["new_beacon", "NewBeacon"]
     """
     for child in root_obj.get_children():
         if child == target_obj:
@@ -88,14 +87,14 @@ def main():
     if not os.path.exists(application_folder):
         os.makedirs(application_folder)
 
-    # Передаём в GUI сам application как корень дерева
+    # Pass the application itself as the tree root to the GUI
     selected = select_objects([application])
 
     if not selected:
         print("No objects selected. Export cancelled.")
         return
 
-    # --- НОВАЯ ЛОГИКА ДЛЯ APPLICATION ---
+    # --- NEW LOGIC FOR APPLICATION ---
     if application in selected:
         print("Application selected. Exporting all children (recursively)...")
         for child in application.get_children():
@@ -103,7 +102,7 @@ def main():
             export_child(child, application, application_folder)
         print("Done!")
         return
-    # --- КОНЕЦ НОВОЙ ЛОГИКИ ---
+    # --- END OF NEW LOGIC ---
 
     print("Selected {} object(s). Starting recursive export...".format(len(selected)))
     for obj in selected:
@@ -129,10 +128,11 @@ def main():
 
     print("Done!")
 
-
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
         print(e)
         raise e
+
+  

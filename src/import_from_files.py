@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+
+    # -*- coding: utf-8 -*-
 import os
 
 from communication_import_export import import_communication
@@ -6,20 +7,17 @@ from entrypoint import find_application, find_communication, get_device_entrypoi
 from import_export import *
 from util import *
 
-
 def first_word_of_line_iter(f):
     for line in f.readlines():
         words = line.strip().split()
         if len(words) > 0:
             yield words[0]
 
-
 def import_directory(dir_path, dir_parent_obj):
     children = os.listdir(dir_path)
-    # this is a naughty way to ensure parent POU's are created before their children
+    # This is a naughty way to ensure parent POU's are created before their children
     for child in sorted(children, key=lambda x: x.count(".")):
         import_directory_child(child, dir_path, dir_parent_obj)
-
 
 def import_directory_child(child, dir_path, dir_parent_obj):
     full_path = os.path.join(dir_path, child)
@@ -32,7 +30,7 @@ def import_directory_child(child, dir_path, dir_parent_obj):
 
     if filename.endswith(".gvl"):
         if ext == ".xml":
-            # this is just here to point out that the xml is imported alongside the st file
+            # This is just here to point out that the xml is imported alongside the st file
             pass
         if ext == ".st":
             import_gvl(child, dir_path, dir_parent_obj, import_directory)
@@ -41,7 +39,7 @@ def import_directory_child(child, dir_path, dir_parent_obj):
         if ext == ".xml":
             import_sub_pou(child, dir_path, dir_parent_obj, import_directory)
         if ext == ".st":
-            # currently only methods are exported as ST if possible
+            # Currently only methods are exported as ST if possible
             import_method_st(child, dir_path, dir_parent_obj, import_directory)
     else:
         if ext == ".xml":
@@ -55,7 +53,6 @@ def import_directory_child(child, dir_path, dir_parent_obj):
 
                     if word in ["PROGRAM", "FUNCTION_BLOCK", "FUNCTION"]:
                         import_pou_st(child, dir_path, dir_parent_obj, import_directory)
-
 
 def import_from_files(project):
     src_folder = get_src_folder(project)
@@ -76,3 +73,5 @@ def import_from_files(project):
             import_communication(communication, device_folder)
         else:
             print("Skipping communication import for " + device_obj.get_name())
+
+  

@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+
+    # -*- coding: utf-8 -*-
 # REMEMBER: this is python 2.7
 from __future__ import print_function
 
@@ -17,13 +18,11 @@ from import_export import OBJECT_TYPE_TO_EXPORT_FUNCTION
 from object_type import get_object_type
 from util import *
 
-
 def export_child(child_obj, parent_obj, parent_folder_path):
     child_obj_type = get_object_type(child_obj)
     export_fn = OBJECT_TYPE_TO_EXPORT_FUNCTION.get(child_obj_type)
     if export_fn is not None:
         export_fn(child_obj, parent_obj, parent_folder_path, export_child)
-
 
 try:
     print_python_version()
@@ -54,3 +53,5 @@ except Exception as e:
     raise e
 
 print("Done!")
+
+  

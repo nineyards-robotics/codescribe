@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+
+    # -*- coding: utf-8 -*-
 # REMEMBER: this is python 2.7
 import inspect
-
 
 class ObjectType:
     POU = "POU"
@@ -21,7 +21,7 @@ class ObjectType:
     CALL_TO_POU = "CALL_TO_POU"
     VISUALISATION = "VISUALISATION"
 
-    # Новые типы, обнаруженные в проекте
+    # New types found in the project
     PLC_LOGIC = "PLC_LOGIC"
     TEXT_LIST = "TEXT_LIST"
     INTERFACE_METHOD = "INTERFACE_METHOD"
@@ -55,13 +55,12 @@ class ObjectType:
                 elements.append(value)
         return elements
 
-
 # Other mapping lists:
 # https://github.com/tkucic/codesys_workflow_automation/blob/main/src/codesysBulker.py#L9
 # https://github.com/18thCentury/CodeSys/blob/master/export.py#L10
 
 GUID_TYPE_MAPPING = {
-    # Существующие GUID
+    # Existing GUIDs
     "6f9dac99-8de1-4efc-8465-68ac443b7d08": ObjectType.POU,
     "2db5746d-d284-4425-9f7f-2663a34b0ebc": ObjectType.DUT,
     "ffbfa93a-b94d-45fc-a329-229860183b1d": ObjectType.GVL,
@@ -79,14 +78,14 @@ GUID_TYPE_MAPPING = {
     "413e2a7d-adb1-4d2c-be29-6ae6e4fab820": ObjectType.CALL_TO_POU,
     "f18bec89-9fef-401d-9953-2f11739a6808": ObjectType.VISUALISATION,
 
-    # Новые GUID из проекта
+    # New GUIDs from project
     "40b404f9-e5dc-42c6-907f-c89f4a517386": ObjectType.PLC_LOGIC,
     "639b491f-5557-464c-af91-1471bac9f549": ObjectType.APPLICATION,
-    "6654496c-404d-479a-aad2-8551054e5f1e": ObjectType.INTERFACE,           # Моторы
+    "6654496c-404d-479a-aad2-8551054e5f1e": ObjectType.INTERFACE,           # Motors
     "f89f7675-27f1-46b3-8abb-b7da8e774ffd": ObjectType.INTERFACE_METHOD,    # start
     "2bef0454-1bd3-412a-ac2c-af0f31dbc40f": ObjectType.TEXT_LIST,           # Rejim_heat
     "98a2708a-9b18-4f31-82ed-a1465b24fa2d": ObjectType.TASK,                # VISU_TASK
-    "261bd6e6-249c-4232-bb6f-84c2fbeef430": ObjectType.PERSISTENT,          # Pr (глобальные ссылки)
+    "261bd6e6-249c-4232-bb6f-84c2fbeef430": ObjectType.PERSISTENT,          # Pr (global references)
     "bb0b9044-714e-4614-ad3e-33cbdf34d16b": ObjectType.IMAGE_POOL,          # Triline
     "c0a56ce5-14a3-4757-ac56-3eab44c974b3": ObjectType.ALARM_CONFIGURATION,
     "21f4ed1d-ec95-4666-820e-4abf64d93d6b": ObjectType.ALARM_GROUP,         # Alarm_con
@@ -94,16 +93,17 @@ GUID_TYPE_MAPPING = {
     "5bd56248-46fc-4108-be33-ed01ad87d070": ObjectType.ALARM_STORAGE,       # AlarmStorage
     "792f2eb6-721e-4e64-ba20-bc98351056db": ObjectType.GET_ACCESSOR,        # Get
     "62ebfd1c-d342-43e5-8efb-f22b6d8e4a04": ObjectType.ABSTRACT_CLASS_METHOD,   # init
-    "28747452-a93d-4b34-8d05-d2c6018edd7d": ObjectType.INTERFACE_GET_ACCESSOR,  # Get (другой)
+    "28747452-a93d-4b34-8d05-d2c6018edd7d": ObjectType.INTERFACE_GET_ACCESSOR,  # Get (another)
     "a56744ff-693f-4597-95f9-0e1c529fffc2": ObjectType.EXTERNAL_FILE,       # favicon
     # "8e687a04-7ca7-42d3-be06-fcbda676c5ef": ObjectType.VISUALIZATION_STYLE,
     # "4d3fdb8f-ab50-4c35-9d3a-d4bb9bb9a628": ObjectType.VISUALIZATION_MANAGER,
     # "0fdbf158-1ae0-47d9-9269-cd84be308e9d": ObjectType.WEB_VISUALIZATION,
     "085766fd-043e-4545-8e8d-d651d56d5d3b": ObjectType.ADDITIONAL_DEVICE,   # PLC210_03
     "63784cbb-9ba0-45e6-9d69-babf3f040511": ObjectType.GLOBAL_TEXT_LIST,
-    "9001d745-b9c5-4d77-90b7-b29c3f77a23b": ObjectType.RESOURCE,      # изображение sun_650x450.jpg
+    "9001d745-b9c5-4d77-90b7-b29c3f77a23b": ObjectType.RESOURCE,      # image sun_650x450.jpg
 }
-
 
 def get_object_type(obj):
     return GUID_TYPE_MAPPING.get(str(obj.type), ObjectType.UNKNOWN)
+
+  
