@@ -1,7 +1,8 @@
+
+    # -*- coding: utf-8 -*-
 # REMEMBER: this is python 2.7
 from object_type import ObjectType, get_object_type
 from util import *
-
 
 def get_src_folder(project):
     working_dir = os.path.dirname(project.path)
@@ -9,7 +10,6 @@ def get_src_folder(project):
     src_folder = os.path.join(working_dir, project_name)
 
     return src_folder
-
 
 def get_device_entrypoints(project):
     children = project.get_children()
@@ -22,16 +22,31 @@ def get_device_entrypoints(project):
 
         yield child
 
-
 def find_application(device_obj):
     return first_or_error(
         device_obj.find("Application", recursive=True),
         "Couldn't find Application inside " + device_obj.get_name(),
     )
 
-
 def find_communication(device_obj):
-    return first_or_error(
-        device_obj.find("Communication", recursive=True),
-        "Couldn't find Communication inside " + device_obj.get_name(),
-    )
+    # Look for Communication as folder or object
+    comm_obj = None
+
+    # Try to find Communication
+    for obj in device_obj.find("Communication", recursive=True):
+        comm_obj = obj
+        break
+
+    if comm_obj is None:
+        # Try other name variants
+        for obj in device_obj.find("Communications", recursive=True):
+            comm_obj = obj
+            break
+
+    if comm_obj is None:
+        print("Warning: Communication object not found in " + device_obj.get_name())
+        return None
+
+    return comm_obj
+
+  

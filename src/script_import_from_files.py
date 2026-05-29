@@ -1,6 +1,12 @@
+
+    # -*- coding: utf-8 -*-
 # REMEMBER: this is python 2.7
 from __future__ import print_function
+import imp
+import sys
 
+imp.reload(sys)
+sys.setdefaultencoding('utf-8')
 import scriptengine  # type: ignore
 
 from import_from_files import import_from_files
@@ -25,3 +31,5 @@ except Exception as e:
     raise e
 
 print("Done!")
+
+  

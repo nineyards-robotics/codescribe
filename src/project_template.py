@@ -1,3 +1,5 @@
+
+    # -*- coding: utf-8 -*-
 # REMEMBER: this is python 2.7
 import os
 
@@ -5,7 +7,6 @@ import scriptengine  # type: ignore
 
 PROJECT_EXT = ".project"
 TEMPLATE_FILEPART = "_template_v"
-
 
 def find_template_paths_and_versions(project):
     working_dir = os.path.dirname(project.path)
@@ -30,7 +31,6 @@ def find_template_paths_and_versions(project):
 
     return template_paths, template_versions
 
-
 def generate_template_path(project, version_number):
     working_dir = os.path.dirname(project.path)
     project_name, _ = os.path.splitext(os.path.basename(scriptengine.projects.primary.path))
@@ -38,3 +38,5 @@ def generate_template_path(project, version_number):
     template_name_start = project_name + TEMPLATE_FILEPART
 
     return os.path.join(working_dir, template_name_start + str(version_number) + PROJECT_EXT)
+
+  

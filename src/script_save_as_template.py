@@ -1,3 +1,5 @@
+
+    # -*- coding: utf-8 -*-
 # REMEMBER: this is python 2.7
 from __future__ import print_function
 
@@ -12,7 +14,6 @@ from import_export import *
 from project_template import find_template_paths_and_versions, generate_template_path
 from util import *
 
-
 def get_new_template_version(template_versions):
     if len(template_versions) < 1:
         print("No existing template found!")
@@ -25,13 +26,11 @@ def get_new_template_version(template_versions):
     print("New template version: " + str(new_version))
     return new_version
 
-
 def delete_old_templates(template_paths):
     print("Deleting " + str(len(template_paths)) + " old template(s):")
     for path in template_paths:
         print("    " + path)
         os.remove(path)
-
 
 try:
     print_python_version()
@@ -61,3 +60,5 @@ except Exception as e:
     raise e
 
 print("Done!")
+
+  

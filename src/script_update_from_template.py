@@ -1,3 +1,5 @@
+
+    # -*- coding: utf-8 -*-
 # REMEMBER: this is python 2.7
 from __future__ import print_function
 
@@ -10,14 +12,12 @@ from import_from_files import import_from_files
 from project_template import find_template_paths_and_versions
 from util import *
 
-
 def get_newest_template_path(template_paths, template_versions):
     newest_version = max(template_versions)
     newest_idx = template_versions.index(newest_version)
     newest_path = template_paths[newest_idx]
     print("Found template version " + str(newest_version) + " at " + newest_path)
     return newest_path
-
 
 try:
     print_python_version()
@@ -49,3 +49,5 @@ except Exception as e:
     raise e
 
 print("Done!")
+
+  
