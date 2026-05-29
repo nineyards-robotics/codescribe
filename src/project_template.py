@@ -3,7 +3,7 @@ import os
 
 import scriptengine  # type: ignore
 
-PROJECT_EXT = ".project"
+PROJECT_EXTENSIONS = [".project", ".library"]
 TEMPLATE_FILEPART = "_template_v"
 
 
@@ -18,7 +18,7 @@ def find_template_paths_and_versions(project):
 
     for child in os.listdir(working_dir):
         name, ext = os.path.splitext(child)
-        if ext == PROJECT_EXT and name.startswith(template_name_start):
+        if ext in PROJECT_EXTENSIONS and name.startswith(template_name_start):
             version_str = name.replace(template_name_start, "")
             try:
                 version = int(version_str)
@@ -37,4 +37,6 @@ def generate_template_path(project, version_number):
 
     template_name_start = project_name + TEMPLATE_FILEPART
 
-    return os.path.join(working_dir, template_name_start + str(version_number) + PROJECT_EXT)
+    # Preserve the original project extension (.project or .library)
+    _, project_ext = os.path.splitext(scriptengine.projects.primary.path)
+    return os.path.join(working_dir, template_name_start + str(version_number) + project_ext)

@@ -7,7 +7,7 @@ import shutil
 import scriptengine  # type: ignore
 
 from communication_import_export import remove_tracked_communication_devices
-from entrypoint import find_application, find_communication, get_device_entrypoints
+from entrypoint import get_content_targets, get_src_folder
 from import_export import *
 from project_template import find_template_paths_and_versions, generate_template_path
 from util import *
@@ -46,11 +46,10 @@ try:
 
     template_project = scriptengine.projects.get_by_path(new_template_path)
 
-    for device_obj in get_device_entrypoints(template_project):
-        application = find_application(device_obj)
-        remove_tracked_objects(application.get_children())
-        communication = find_communication(device_obj)
-        remove_tracked_communication_devices(communication)
+    for target in get_content_targets(template_project, get_src_folder(template_project)):
+        remove_tracked_objects(target.content_obj.get_children())
+        if target.communication_obj is not None:
+            remove_tracked_communication_devices(target.communication_obj)
 
     template_project.save()
 

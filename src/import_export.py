@@ -1,9 +1,14 @@
 # REMEMBER: this is python 2.7
+import io
 import os
 import re
+import shutil
 
 from object_type import ObjectType, get_object_type
 from util import *
+
+METADATA_FOLDER_SUFFIX = "_metadata"
+METADATA_TYPES = (ObjectType.LIBRARY_MANAGER, ObjectType.PROJECT_INFORMATION)
 
 IMPLEMENTATION_DELIMITER_SPLIT = "// --- BEGIN IMPLEMENTATION ---"
 IMPLEMENTATION_DELIMITER_INSERT = "\n" + IMPLEMENTATION_DELIMITER_SPLIT + "\n\n"
@@ -21,15 +26,21 @@ def write_st_decl_only(obj, f):
 
 def import_st(f, obj):
     f.seek(0)
-    content = str(f.read())
-    declaration, implementation = content.split(IMPLEMENTATION_DELIMITER_SPLIT)
+    content = f.read()
+    parts = content.split(IMPLEMENTATION_DELIMITER_SPLIT, 1)
+    if len(parts) == 2:
+        declaration, implementation = parts
+    else:
+        # No implementation delimiter found; treat entire content as declaration only
+        declaration = parts[0]
+        implementation = ""
     obj.textual_declaration.replace(declaration.strip() + "\n")
     obj.textual_implementation.replace(implementation.strip() + "\n")
 
 
 def import_st_decl_only(f, obj):
     f.seek(0)
-    content = str(f.read())
+    content = f.read()
     obj.textual_declaration.replace(content.strip() + "\n")
 
 
@@ -37,7 +48,7 @@ def write_native(obj, path, recursive=False):
     obj.export_native(path, recursive=recursive)
 
     # using regex instead of an xml parser because it is much quicker (sorry)
-    with open(path, "r+") as f:
+    with io.open(path, "r+", encoding="utf-8") as f:
         lines = f.read()
 
         # XXX: Warning! Overwriting Id's broke visualisations
@@ -94,7 +105,7 @@ def import_folder(child, dir_path, dir_parent_obj, import_dir_fn):
 
 def export_pou(child_obj, parent_obj, parent_folder_path, export_child_fn):
     if child_obj.has_textual_implementation:
-        with open(os.path.join(parent_folder_path, child_obj.get_name() + ".st"), "w") as f:
+        with io.open(os.path.join(parent_folder_path, child_obj.get_name() + ".st"), "w", encoding="utf-8") as f:
             write_st(child_obj, f)
     else:
         export_native(child_obj, parent_obj, parent_folder_path, export_child_fn)
@@ -106,7 +117,7 @@ def export_pou(child_obj, parent_obj, parent_folder_path, export_child_fn):
 def import_pou_st(child, dir_path, dir_parent_obj, import_dir_fn):
     filename, _ = os.path.splitext(child)
     pou_obj = dir_parent_obj.create_pou(filename)
-    with open(os.path.join(dir_path, child), "r") as f:
+    with io.open(os.path.join(dir_path, child), "r", encoding="utf-8") as f:
         import_st(f, pou_obj)
 
 
@@ -116,7 +127,7 @@ def export_gvl(child_obj, parent_obj, parent_folder_path, export_child_fn):
     This is because we need to support EVL and NVL as well, using this function.
     """
     write_native(child_obj, os.path.join(parent_folder_path, child_obj.get_name() + ".gvl.xml"), recursive=False)
-    with open(os.path.join(parent_folder_path, child_obj.get_name() + ".gvl.st"), "w") as f:
+    with io.open(os.path.join(parent_folder_path, child_obj.get_name() + ".gvl.st"), "w", encoding="utf-8") as f:
         write_st_decl_only(child_obj, f)
 
 
@@ -135,15 +146,14 @@ def import_gvl(child, dir_path, dir_parent_obj, import_dir_fn):
         raise ValueError("Expected GVL st file!")
 
     gvl_xml_path = os.path.join(dir_path, name + ".gvl.xml")
-    if os.path.exists(gvl_xml_path):
-        import_native(gvl_xml_path, dir_path, dir_parent_obj, import_dir_fn)
+    if not os.path.exists(gvl_xml_path):
+        raise ValueError("Expected GVL xml file at " + gvl_xml_path)
+
+    import_native(gvl_xml_path, dir_path, dir_parent_obj, import_dir_fn)
+    with io.open(os.path.join(dir_path, child), "r", encoding="utf-8") as f:
         imported_obj = first_of_type_or_error(
             dir_parent_obj.find(name), ObjectType.GVL, name + " GVL should have been created, but cannot be found"
         )
-    else:
-        imported_obj = dir_parent_obj.create_gvl(name)
-
-    with open(os.path.join(dir_path, child), "r") as f:
         import_st_decl_only(f, imported_obj)
 
 
@@ -160,22 +170,22 @@ def import_native(child, dir_path, dir_parent_obj, import_dir_fn):
 
 
 def export_dut(child_obj, parent_obj, parent_folder_path, export_child_fn):
-    with open(os.path.join(parent_folder_path, child_obj.get_name() + ".st"), "w") as f:
+    with io.open(os.path.join(parent_folder_path, child_obj.get_name() + ".st"), "w", encoding="utf-8") as f:
         f.write(child_obj.textual_declaration.text)
 
 
 def import_dut(child, dir_path, dir_parent_obj, import_dir_fn):
     filename, _ = os.path.splitext(child)
     dut_obj = dir_parent_obj.create_dut(filename)
-    with open(os.path.join(dir_path, child), "r") as f:
+    with io.open(os.path.join(dir_path, child), "r", encoding="utf-8") as f:
         f.seek(0)
-        dut_obj.textual_declaration.replace(str(f.read()))
+        dut_obj.textual_declaration.replace(f.read())
 
 
 def export_method(child_obj, parent_obj, parent_folder_path, export_child_fn):
     if child_obj.has_textual_implementation:
-        with open(
-            os.path.join(parent_folder_path, parent_obj.get_name() + "." + child_obj.get_name() + ".st"), "w"
+        with io.open(
+            os.path.join(parent_folder_path, parent_obj.get_name() + "." + child_obj.get_name() + ".st"), "w", encoding="utf-8"
         ) as f:
             write_st(child_obj, f)
     else:
@@ -197,7 +207,7 @@ def import_method_st(child, dir_path, dir_parent_obj, import_dir_fn):
     )
 
     method_obj = parent_obj.create_method(method_name)
-    with open(full_path, "r") as f:
+    with io.open(full_path, "r", encoding="utf-8") as f:
         import_st(f, method_obj)
 
 
@@ -242,3 +252,28 @@ def remove_tracked_objects(obj_list):
         if get_object_type(obj) in OBJECT_TYPE_TO_EXPORT_FUNCTION:
             print("Removing " + obj.get_name())
             obj.remove()
+
+
+def export_metadata(project, src_folder):
+    """Export library metadata (Library Manager, Project Information) as native
+    XML into a sibling '<name>_metadata' folder, purely for git diffing.
+
+    This is an export-only snapshot: it is deliberately kept OUT of the tracked
+    object set (OBJECT_TYPE_TO_EXPORT_FUNCTION) and OUT of the source folder, so
+    it is never deleted from a template nor re-imported. The template still
+    carries the authoritative configuration.
+    """
+    working_dir = os.path.dirname(project.path)
+    name = os.path.basename(os.path.normpath(src_folder))
+    metadata_folder = os.path.join(working_dir, name + METADATA_FOLDER_SUFFIX)
+
+    if os.path.exists(metadata_folder):
+        shutil.rmtree(metadata_folder)
+
+    metadata_objs = [c for c in project.get_children() if get_object_type(c) in METADATA_TYPES]
+    if not metadata_objs:
+        return
+
+    os.mkdir(metadata_folder)
+    for obj in metadata_objs:
+        write_native(obj, os.path.join(metadata_folder, obj.get_name() + ".xml"), recursive=True)
