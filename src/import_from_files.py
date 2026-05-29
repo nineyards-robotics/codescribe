@@ -179,7 +179,20 @@ def incremental_import(content_obj, src_folder, subfolder, manifest_path, force_
     scoped_old = dict((k, v) for k, v in old_hashes.items() if in_scope(k))
     changed, deleted = diff(scoped_old, new_hashes)
 
-    print("Incremental import: %d changed/new, %d deleted" % (len(changed), len(deleted)))
+    # diff() lumps new files in with changed ones; split them apart for the log.
+    new_files = sorted(rel for rel in changed if rel not in scoped_old)
+    modified_files = sorted(rel for rel in changed if rel in scoped_old)
+
+    print(
+        "Incremental import: %d new, %d changed, %d deleted"
+        % (len(new_files), len(modified_files), len(deleted))
+    )
+    for rel in new_files:
+        print("  + new:     " + rel)
+    for rel in modified_files:
+        print("  ~ changed: " + rel)
+    for rel in sorted(deleted):
+        print("  - deleted: " + rel)
 
     for rel in sorted(deleted):
         remove_object_for_file(rel, content_obj)

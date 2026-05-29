@@ -42,19 +42,22 @@ def _remove_empty_dirs(root):
 
 def sync_folder(temp_root, dest_root):
     """Copy only changed/new files from temp_root into dest_root and remove files
-    in dest_root that no longer exist in temp_root. Returns (changed, new, removed)."""
+    in dest_root that no longer exist in temp_root. Returns (changed, new, removed)
+    where each is a sorted list of relative paths."""
     if not os.path.isdir(dest_root):
         os.makedirs(dest_root)
 
     new_hashes = compute_hashes(temp_root)
     old_hashes = compute_hashes(dest_root)
 
-    changed = new = removed = 0
+    changed = []
+    new = []
+    removed = []
     for rel, h in new_hashes.items():
         if rel not in old_hashes:
-            new += 1
+            new.append(rel)
         elif old_hashes[rel] != h:
-            changed += 1
+            changed.append(rel)
         else:
             continue
         dst_path = os.path.join(dest_root, *rel.split("/"))
@@ -66,10 +69,21 @@ def sync_folder(temp_root, dest_root):
     for rel in old_hashes:
         if rel not in new_hashes:
             os.remove(os.path.join(dest_root, *rel.split("/")))
-            removed += 1
+            removed.append(rel)
 
     _remove_empty_dirs(dest_root)
-    return changed, new, removed
+    return sorted(changed), sorted(new), sorted(removed)
+
+
+def _print_sync_summary(changed, new, removed):
+    """Print the count summary plus the individual files in each category."""
+    print("Export: %d changed, %d new, %d removed" % (len(changed), len(new), len(removed)))
+    for rel in new:
+        print("  + new:     " + rel)
+    for rel in changed:
+        print("  ~ changed: " + rel)
+    for rel in removed:
+        print("  - removed: " + rel)
 
 
 def export_all(project, src_folder):
@@ -96,7 +110,7 @@ def export_incremental(project, src_folder):
     try:
         export_content(project, temp_root)
         changed, new, removed = sync_folder(temp_root, src_folder)
-        print("Export: %d changed, %d new, %d removed" % (changed, new, removed))
+        _print_sync_summary(changed, new, removed)
     finally:
         shutil.rmtree(temp_root)
 
