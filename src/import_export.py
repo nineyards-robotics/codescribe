@@ -2,9 +2,13 @@
 import io
 import os
 import re
+import shutil
 
 from object_type import ObjectType, get_object_type
 from util import *
+
+METADATA_FOLDER_SUFFIX = "_metadata"
+METADATA_TYPES = (ObjectType.LIBRARY_MANAGER, ObjectType.PROJECT_INFORMATION)
 
 IMPLEMENTATION_DELIMITER_SPLIT = "// --- BEGIN IMPLEMENTATION ---"
 IMPLEMENTATION_DELIMITER_INSERT = "\n" + IMPLEMENTATION_DELIMITER_SPLIT + "\n\n"
@@ -23,7 +27,13 @@ def write_st_decl_only(obj, f):
 def import_st(f, obj):
     f.seek(0)
     content = f.read()
-    declaration, implementation = content.split(IMPLEMENTATION_DELIMITER_SPLIT)
+    parts = content.split(IMPLEMENTATION_DELIMITER_SPLIT, 1)
+    if len(parts) == 2:
+        declaration, implementation = parts
+    else:
+        # No implementation delimiter found; treat entire content as declaration only
+        declaration = parts[0]
+        implementation = ""
     obj.textual_declaration.replace(declaration.strip() + "\n")
     obj.textual_implementation.replace(implementation.strip() + "\n")
 
@@ -242,3 +252,28 @@ def remove_tracked_objects(obj_list):
         if get_object_type(obj) in OBJECT_TYPE_TO_EXPORT_FUNCTION:
             print("Removing " + obj.get_name())
             obj.remove()
+
+
+def export_metadata(project, src_folder):
+    """Export library metadata (Library Manager, Project Information) as native
+    XML into a sibling '<name>_metadata' folder, purely for git diffing.
+
+    This is an export-only snapshot: it is deliberately kept OUT of the tracked
+    object set (OBJECT_TYPE_TO_EXPORT_FUNCTION) and OUT of the source folder, so
+    it is never deleted from a template nor re-imported. The template still
+    carries the authoritative configuration.
+    """
+    working_dir = os.path.dirname(project.path)
+    name = os.path.basename(os.path.normpath(src_folder))
+    metadata_folder = os.path.join(working_dir, name + METADATA_FOLDER_SUFFIX)
+
+    if os.path.exists(metadata_folder):
+        shutil.rmtree(metadata_folder)
+
+    metadata_objs = [c for c in project.get_children() if get_object_type(c) in METADATA_TYPES]
+    if not metadata_objs:
+        return
+
+    os.mkdir(metadata_folder)
+    for obj in metadata_objs:
+        write_native(obj, os.path.join(metadata_folder, obj.get_name() + ".xml"), recursive=True)
